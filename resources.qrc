@@ -1,0 +1,15 @@
+<RCC>
+    <qresource prefix="/u">
+        <file>assets/localtunalogo.png</file>
+        <file>assets/next.png</file>
+        <file>assets/pause.png</file>
+        <file>assets/play.png</file>
+        <file>assets/previous.png</file>
+        <file>assets/repeat.png</file>
+        <file>assets/shuffle.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>Main.qml</file>
+        <file>Recommendations.qml</file>
+    </qresource>
+</RCC>
