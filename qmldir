@@ -1,0 +1,9 @@
+module localtuna
+linktarget applocaltunaplugin
+optional plugin applocaltunaplugin
+classname localtunaPlugin
+typeinfo applocaltuna.qmltypes
+prefer :/qt/qml/localtuna/
+Main 254.0 Main.qml
+depends QtQuick
+

@@ -8,43 +8,8 @@ ApplicationWindow {
     height: 750
     title: "Local Tuna"
     color: "#0F0F0F"
-    id: root
-    visibility:  Window.Maximized  //visibility: Window.FullScreen
-    flags: Qt.Window
-    property string currentSong: ""
-    property var songListModel: musicManager.songs
-    property var itemToLoad: []
-    Connections {
-        target: musicManager
-        function onCurrentSongChanged(displayText) {
-            currentSong = displayText
-        }
-    }
-
-    Loader {
-        id: recommendationsLoader
-        anchors.fill: parent
-        visible: false
-        source: ""
-
-        onLoaded: {
-            if (item) {
-                item.recommendedModel = itemToLoad
-
-                // 🔁 handle back signal HERE
-                item.backRequested.connect(() => {
-                    recommendationsLoader.source = ""
-                    recommendationsLoader.visible = false
-                    mainContent.visible = true
-                })
-            }
-        }
-    }
-
-
 
     ColumnLayout {
-         id: mainContent
         anchors.fill: parent
         spacing: 0
 
@@ -52,10 +17,7 @@ ApplicationWindow {
         Rectangle {
             Layout.fillWidth: true
             height: 64
-            gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#1F1F1F" }
-                    GradientStop { position: 0.5; color: "#151515" }
-                    GradientStop { position: 1.0; color: "#1F1F1F" }}
+            color: "#181818"
 
             RowLayout {
                 anchors.fill: parent
@@ -63,11 +25,10 @@ ApplicationWindow {
                 spacing: 10
 
                 Image {
-                    source: "qrc:/u/assets/localtunalogo.png"
+                    source: "qrc:/ui/localtunalogo.png"
+                    width: 32
+                    height: 32
                     fillMode: Image.PreserveAspectFit
-                    Layout.preferredWidth: 32
-                    Layout.preferredHeight: 40
-                    Layout.alignment: Qt.AlignVCenter
                 }
 
                 Text {
@@ -77,256 +38,233 @@ ApplicationWindow {
                     color: "#E50914"
                 }
 
-                Item { Layout.fillWidth: true
-                }
+                Item { Layout.fillWidth: true }
 
                 TextField {
-                    id: searchField
-                    Layout.preferredWidth: 300
-                    Layout.preferredHeight: 36
+                    width: 380
+                    height: 42
+                    placeholderText: "Search songs, artists, genres"
+                    color: "white"
+                    font.pixelSize: 14
 
-                     placeholderText: "Search songs, artists, genres"
-                     color: "white"
-                     background: Rectangle {
-                         radius: 21
-                         color: "#2A2A2A"
-                     }
-                     onTextChanged: {
-                           if (text.trim() === "") {
-                               songListModel = musicManager.songs
-                           } else {
-                               songListModel = musicManager.searchSongs(text)
-                           }
-                       }
+                    background: Rectangle {
+                        radius: 21
+                        color: "#2A2A2A"
+                    }
                 }
             }
         }
 
         // 🧱 MAIN AREA
-        // 🧱 MAIN AREA
-        Rectangle {
+        RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            gradient: Gradient {
-                  GradientStop { position: 0.0; color: "#2A0F12" }
-                  GradientStop { position: 0.25; color: "#0F0F0F" }// subtle red top
-                  GradientStop { position: 0.5  ; color: "#0F0F0F" }
-                  GradientStop { position: 0.75; color: "#0F0F0F" }// deep black middle
-                  GradientStop { position: 1.0; color: "#2A0F12" }  // subtle red bottom
-              }
 
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: 25
-                spacing: 14
+            // 📁 SIDEBAR
+            Rectangle {
+                width: 240
+                color: "#121212"
 
-                // Title
-                Text {
-                    text: "All Songs"
-                    font.pixelSize: 27
-                    font.bold: true
-                    color: "white"
-                    Layout.alignment: Qt.AlignLeft
-                }
-                Item {
-                    height: 5  // increase this value for more space (e.g. 30, 40)
-                }
-                // Header row
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 28
-                    color: "transparent"
+                Column {
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.margins: 20
+                    spacing: 16
 
-                    Row {
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 40
+                    Text {
+                        text: "Library"
+                        color: "white"
+                        font.pixelSize: 18
+                        font.bold: true
+                    }
 
-                        Text { text: "TITLE";  width: 220; color: "#A7A7A7" }
-                        Text { text: "ARTIST"; width: 180; color: "#A7A7A7" }
-                        Text { text: "GENRE";  width: 120; color: "#A7A7A7" }
+                    Button {
+                        text: "All Songs"
+                        width: parent.width
+                    }
+
+                    Button {
+                        text: "By Artist"
+                        width: parent.width
+                    }
+
+                    Button {
+                        text: "By Genre"
+                        width: parent.width
                     }
                 }
+            }
 
-                Rectangle {
-                    Layout.fillWidth: true
-                    height: 1
-                    color: "#2A2A2A"
-                }
-            //song display and play section
-                ListView {
-                    id: songList
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    clip: true
-                    model: songListModel
-                    spacing: 6
+            // 🎶 CONTENT AREA
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                color: "#0F0F0F"
 
-                    property string menuSong: ""
+                Column {
+                    anchors.fill: parent
+                    anchors.margins: 25
+                    spacing: 12
 
-                    delegate: Rectangle {
-                        width: songList.width
+                    Text {
+                        text: "All Songs"
+                        font.pixelSize: 22
+                        font.bold: true
+                        color: "white"
+                    }
+
+                    // HEADER
+                    Row {
+                        spacing: 40
+                        Text { text: "TITLE"; color: "#A7A7A7"; width: 220 }
+                        Text { text: "ARTIST"; color: "#A7A7A7"; width: 180 }
+                        Text { text: "GENRE"; color: "#A7A7A7"; width: 120 }
+                    }
+
+                    Rectangle {
+                        height: 1
+                        width: parent.width
+                        color: "#2A2A2A"
+                    }
+
+                    // SONG ROW 1
+                    Rectangle {
+                        width: parent.width
                         height: 46
                         radius: 6
-                        color: {
-                             if (currentSong === modelData)
-                                 return "transparent"
-                             if (mouseArea.containsMouse)
-                                 return "transparent"
-                             return "#181818"
-                         }
-
-                        property var fields: modelData.split("|")
-                        property string title: fields[0].trim()
-                        property string artist: fields[1].trim()
-                        property string genre: fields[2].trim()
+                        color: "#181818"
 
                         Row {
                             anchors.verticalCenter: parent.verticalCenter
                             spacing: 40
 
-                            Text {
-                                text: title
-                                width: 220
-                                elide: Text.ElideRight
-                                color: "white"
-                            }
-
-                            Text {
-                                text: artist
-                                width: 180
-                                color: "#A7A7A7"
-                            }
-
-                            Text {
-                                text: genre
-                                width: 120
-                                color: "#A7A7A7"
-                            }
-                        }
-
-                        MouseArea {
-                            id: mouseArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                            onClicked: (mouse) => {
-                                             songList.menuSong = modelData
-                                if (mouse.button === Qt.RightButton) {
-
-                                               // convert delegate-local coords to window coords
-                                                    const p = mouseArea.mapToItem(null, mouse.x, mouse.y)
-                                                    songMenu.popup(p.x, p.y)
-                                } else {
-
-                                    musicManager.playSong(modelData)
-                                    currentSong = modelData
-                                }
-                            }
+                            Text { text: "Believer"; color: "white"; width: 220 }
+                            Text { text: "Imagine Dragons"; color: "#A7A7A7"; width: 180 }
+                            Text { text: "Pop"; color: "#A7A7A7"; width: 120 }
                         }
                     }
 
-                    ScrollBar.vertical: ScrollBar {
-                        policy: ScrollBar.AsNeeded
+                    // SONG ROW 2
+                    Rectangle {
+                        width: parent.width
+                        height: 46
+                        radius: 6
+                        color: "#181818"
+
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: 40
+
+                            Text { text: "Heat Waves"; color: "white"; width: 220 }
+                            Text { text: "Glass Animals"; color: "#A7A7A7"; width: 180 }
+                            Text { text: "Indie"; color: "#A7A7A7"; width: 120 }
+                        }
                     }
                 }
             }
-        }
-        Menu {
-            id: songMenu
-
-            MenuItem {
-                text: "Add to Queue"
-                onTriggered: musicManager.addToQueue(songList.menuSong)
-            }
-
-            MenuItem {
-                text: "View Similar"
-                onTriggered: {
-                      // Store the recommended list first
-                      itemToLoad = musicManager.viewSimilar(songList.menuSong)
-
-                      // Load the page (onLoaded will automatically set recommendedModel)
-                      recommendationsLoader.source = "Recommendations.qml"
-                      recommendationsLoader.visible = true
-                     mainContent.visible = false   // ✅ THIS IS KEY
-                  }
-              }
         }
 
         // ▶️ PLAYER BAR
         Rectangle {
             Layout.fillWidth: true
             height: 90
-            gradient: Gradient {
-                    GradientStop { position: 0.0; color: "#1F1F1F" }
-                    GradientStop { position: 0.5; color: "#151515" }
-                    GradientStop { position: 1.0; color: "#1F1F1F" }}
-
+            color: "#181818"
 
             Row {
                 anchors.centerIn: parent
                 spacing: 28
 
-
                 // Previous
                 Button {
-                    width: 44; height: 44; hoverEnabled: false
-                    background: Rectangle { radius: 22; color: "#FF1438" }
-                    contentItem: Image { source: "qrc:/u/assets/previous.png"; anchors.centerIn: parent; width: 15; height: 15 }
-                    onClicked: musicManager.prevSong()
+                    width: 44
+                    height: 44
+                    background: Rectangle {
+                        radius: 22
+                        color: "#2A2A2A"
+                    }
+                    contentItem: Image {
+                        source: "assets/previous.png"
+                        anchors.centerIn: parent
+                        width: 20
+                        height: 20
+                    }
                 }
-                //play pause
+
+                // Play / Pause (ONE BUTTON)
                 Button {
-                                id: playPauseBtn
-                                width: 56
-                                height: 56
-                                focus: true
+                    id: playPauseBtn
+                    width: 56
+                    height: 56
 
+                    property bool isPlaying: false
 
+                    background: Rectangle {
+                        radius: 28
+                        color: "#E50914"
+                    }
 
-                                background: Rectangle {
-                                    radius: 28
-                                    color: "#E50914"
-                                }
+                    contentItem: Image {
+                        source: playPauseBtn.isPlaying
+                                ? "assets/pause.png"
+                                : "assets/play.png"
+                        anchors.centerIn: parent
+                        width: 22
+                        height: 22
+                    }
 
-                                contentItem: Image {
-                                    source: musicManager.playing
-                                            ? "qrc:/u/assets/pause.png"
-                                            : "qrc:/u/assets/play.png"
-                                    anchors.centerIn: parent
-                                    width: 22; height: 22
-                                }
-
-                                onClicked: {
-                                    if (currentSong === "")
-                                        return
-
-                                    if (musicManager.playing) {
-                                        musicManager.pause()
-
-                                    } else {
-                                        musicManager.resume()
-
-                                    }
-                                }
-                            }
+                    onClicked: {
+                        isPlaying = !isPlaying
+                        console.log(isPlaying ? "Play" : "Pause")
+                    }
+                }
 
                 // Next
                 Button {
-                    width: 44; height: 44; hoverEnabled: false
-                    background: Rectangle { radius: 22; color: "#FF1438" }
-                    contentItem: Image { source: "qrc:/u/assets/next.png"; anchors.centerIn: parent; width: 20; height: 20 }
-                       onClicked: musicManager.nextSong()
-                }
-                // Shuffle
-                Button {
-                    width: 44; height: 44; hoverEnabled: false
-                    background: Rectangle { radius: 22; color: "#FF1438" }
-                    contentItem: Image { source: "qrc:/u/assets/shuffle.png"; anchors.centerIn: parent; width: 20; height: 20 }
-                    onClicked: musicManager.shuffleSong();
+                    width: 44
+                    height: 44
+                    background: Rectangle {
+                        radius: 22
+                        color: "#2A2A2A"
+                    }
+                    contentItem: Image {
+                        source: "assets/next.png"
+                        anchors.centerIn: parent
+                        width: 20
+                        height: 20
+                    }
                 }
 
+                // Repeat
+                Button {
+                    width: 44
+                    height: 44
+                    background: Rectangle {
+                        radius: 22
+                        color: "#2A2A2A"
+                    }
+                    contentItem: Image {
+                        source: "assets/repeat.png"
+                        anchors.centerIn: parent
+                        width: 20
+                        height: 20
+                    }
+                }
+
+                // Shuffle
+                Button {
+                    width: 44
+                    height: 44
+                    background: Rectangle {
+                        radius: 22
+                    }
+                    contentItem: Image {
+                        source: "qrc: /uni/assets/pause.png"
+                        anchors.centerIn: parent
+                        width: 20
+                        height: 20
+                    }
+                }
             }
         }
     }
